@@ -34,11 +34,16 @@ flashloan-rs = "0.1.0"
 
 ```ml
 .
+├─ contracts
+│  ├─ interfaces
+│  │  ├─ IERC20.sol — ERC20 interface
+│  │  ├─ IERC3156FlashBorrower.sol — Flashloan borrower interface
+|  |  └─ IERC3156FlashLender.sol — Flashloan lender interface
+│  ├─ FlashBorrower.huff — A [huff](https://github.com/huff-language) Flashloan Receiver Contract Implementation
+│  └─ FlashBorrower.sol — An Extensible Flashloan Receiver Contract
 ├─ examples
 │  ├─ custom_borrower.rs — Flashloan-rs usage with a custom borrower contract
 │  └─ pure_arb.rs — Executing a pure arbitrage with flashloan-rs
-├─ contracts
-│  └─ Receiver.sol — An Extensible Flashloan Receiver Contract
 ├─ lib — Foundry Libraries
 ├─ src
 │  ├─ builder.rs — The FlashloanBuilder
