@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.15;
 
 /// @title ERC20 Interface
 /// @author asnared <https://github.com/abigger87>
@@ -22,11 +22,7 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
 
     /// @dev Transfers tokens from the sender using the caller's allowance
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
     /// @dev Emitted when tokens are transfered
     /// @param from The address that is sending the tokens

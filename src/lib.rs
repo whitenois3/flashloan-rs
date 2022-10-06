@@ -10,7 +10,13 @@ pub mod errors;
 /// Main Flashloan Builder Module
 pub mod builder;
 
+/// Call3 Module
+pub mod calls;
+
 /// Re-export a prelude
 pub mod prelude {
-    pub use super::builder::*;
+    pub use super::{
+        builder::*,
+        calls::*
+    };
 }

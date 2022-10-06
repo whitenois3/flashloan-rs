@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.15;
 
 import "contracts/interfaces/IERC20.sol";
 import "contracts/interfaces/IERC3156FlashBorrower.sol";
@@ -43,20 +43,15 @@ contract FlashBorrower is IERC3156FlashBorrower {
     ///                      CORE LOGIC
     ///  \__/‾‾\__/‾‾\________________________/‾‾\__/‾‾\__/
 
-
     /// @notice Receiver Construction
-    constructor (IERC3156FlashLender lender_, address owner_) {
+    constructor(IERC3156FlashLender lender_, address owner_) {
         lender = lender_;
         OWNER = owner_;
     }
 
     /// @notice Executes the flashloan and middle calls
     /// @notice This is the only contract entrypoint
-    function flashBorrow(
-        address token,
-        uint256 amount,
-        Call3[] calldata calls
-    ) public onlyOwner {
+    function flashBorrow(address token, uint256 amount, Call3[] calldata calls) public onlyOwner {
         // Approve the lender to pull the repayment tokens
         // NOTE: Can make the below viewable calls offchain and pass as calldata to save gas
         uint256 allowance = IERC20(token).allowance(address(this), address(lender));
@@ -105,6 +100,7 @@ contract FlashBorrower is IERC3156FlashBorrower {
     struct Call3 {
         address target;
         bool allowFailure;
+        uint256 value;
         bytes callData;
     }
 
@@ -117,16 +113,14 @@ contract FlashBorrower is IERC3156FlashBorrower {
     /// @notice Only this contract can call from the onFlashLoan callback
     /// @param calls An array of Call3 objects
     /// @return returnData An array of Call3Result objects
-    function aggregate3(Call3[] memory calls) internal returns (
-        Call3Result[] memory returnData
-    ) {
+    function aggregate3(Call3[] memory calls) internal returns (Call3Result[] memory returnData) {
         uint256 length = calls.length;
         returnData = new Call3Result[](length);
         Call3 memory calli;
         for (uint256 i = 0; i < length;) {
             Call3Result memory result = returnData[i];
             calli = calls[i];
-            (result.success, result.returnData) = calli.target.call(calli.callData);
+            (result.success, result.returnData) = calli.target.call{value: calli.value}(calli.callData);
             assembly {
                 // Revert if the call fails and failure is not allowed
                 // `allowFailure := calldataload(add(calli, 0x20))` and `success := mload(result)`
@@ -142,7 +136,9 @@ contract FlashBorrower is IERC3156FlashBorrower {
                     revert(0x00, 0x64)
                 }
             }
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 }
