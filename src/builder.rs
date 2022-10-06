@@ -21,6 +21,11 @@ use std::{str::FromStr, sync::Arc};
 ///     );
 /// ```
 pub struct FlashloanBuilder<M> {
+    /// The flashloan borrower contract
+    pub borrower: Contract<M>,
+    /// The borrower owner (should be the client signer)
+    /// If none, the first client account will be used
+    pub owner: Option<Address>,
     /// A Middleware Client
     pub client: Arc<M>,
     /// An instance of multicall using [multicall3](https://github.com/mds1/multicall)

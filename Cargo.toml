@@ -31,3 +31,7 @@ tokio = { version = "1.0.1", features = ["rt-multi-thread", "macros"] }
 [[example]]
 name = "pure_arb"
 path = "examples/pure_arb.rs"
+
+[[test]]
+name = "builder"
+path = "tests/crate/builder.rs"
