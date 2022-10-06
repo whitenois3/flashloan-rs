@@ -1,6 +1,6 @@
 <img align="right" width="150" height="150" top="100" src="./assets/flashloan.png">
 
-# flashloan-rs • [![ci](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml) ![license](https://img.shields.io/github/license/whitenois3/flashloan-rs) ![Crates.io](https://img.shields.io/crates/v/flashloan-rs)
+# flashloan-rs • [![ci](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml) ![license](https://img.shields.io/github/license/whitenois3/flashloan-rs) ![solidity](https://img.shields.io/badge/solidity-^0.8.17-lightgrey) ![Crates.io](https://img.shields.io/crates/v/flashloan-rs)
 
 Minimal Multicall3 Flashloan Module.
 
