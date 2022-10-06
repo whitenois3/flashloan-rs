@@ -1,29 +1,64 @@
-<img align="right" width="150" height="150" top="100" src="./assets/readme.jpg">
+<img align="right" width="150" height="150" top="100" src="./assets/flashloan.png">
 
-# stub.rs • [![tests](https://github.com/abigger87/stub.rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/abigger87/stub.rs/actions/workflows/tests.yaml) [![lints](https://github.com/abigger87/stub.rs/actions/workflows/lints.yaml/badge.svg)](https://github.com/abigger87/stub.rs/actions/workflows/lints.yaml) ![GitHub](https://img.shields.io/github/license/abigger87/stub.rs)  ![Crates.io](https://img.shields.io/crates/v/stub.rs)
+# flashloan-rs • [![ci](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml) ![license](https://img.shields.io/github/license/whitenois3/flashloan-rs) ![Crates.io](https://img.shields.io/crates/v/flashloan-rs)
 
-Modern, Extensible Template for Rust Projects.
+Minimal Multicall3 Flashloan Module.
 
-## Getting Started
 
-Click `use this template` on [Github](https://github.com/abigger87/stub.rs) to create a new repository with this repo as the initial state.
+### Getting Started
 
-## Blueprint
+[Flashloan-rs](https://github.com/whitenois3/flashloan-rs) is published to crates.io as [flashloan-rs](https://crates.io/crates/flashloan-rs).
 
-```ml
-assets
-├─ embedded documentation images
-example
-├─ src
-│  └─ lib.rs — Example Rust Library
-├─ Cargo.toml — Library Cargo Manifest
-Cargo.toml — Workspace Cargo Manifest
+To use the crate in a Rust project, run the cargo add command like so: `cargo add flashloan-rs`.
+
+Or, add the following to your Cargo.toml:
+
+```toml
+[dependencies]
+flashloan-rs = "0.1.0"
 ```
 
-## Development
 
-TODO
+### Usage
 
-## License
+[Flashloan-rs](https://github.com/whitenois3/flashloan-rs) is built to be extremely simple to use.
 
-[THE UNLICENSE](https://github.com/abigger87/stub.rs/blob/master/LICENSE)
+
+```rust
+// TODO
+```
+
+
+
+### Blueprint
+
+```ml
+.
+├─ examples
+│  ├─ custom_borrower.rs — Flashloan-rs usage with a custom borrower contract
+│  └─ pure_arb.rs — Executing a pure arbitrage with flashloan-rs
+├─ contracts
+│  └─ Receiver.sol — An Extensible Flashloan Receiver Contract
+├─ lib — Foundry Libraries
+├─ src
+│  ├─ builder.rs — The FlashloanBuilder
+│  ├─ errors.rs — Custom errors for flashloan-rs
+│  └─ lib.rs — Module Exports
+├─ foundry.toml — Foundry Config
+└─ Cargo.toml — The flashloan-rs Cargo Manifest
+```
+
+
+### License
+
+[MIT](https://github.com/whitenois3/flashloan-rs/blob/main/LICENSE)
+
+
+### Acknowledgements
+
+A few very notable repositories that were used as reference:
+
+- [multicall3](https://github.com/mds1/multicall)
+- [ethers-rs](https://github.com/gakonst/ethers-rs)
+- [yield-liquidator](https://github.com/yieldprotocol/yield-liquidator)
+- [gelato-sdk](https://github.com/nomad-xyz/gelato-sdk)
