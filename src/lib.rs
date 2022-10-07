@@ -15,9 +15,5 @@ pub mod contract;
 
 /// Re-export a prelude
 pub mod prelude {
-    pub use super::{
-        builder::*,
-        errors::*,
-        contract::*
-    };
+    pub use super::{builder::*, contract::*, errors::*};
 }

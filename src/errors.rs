@@ -31,4 +31,3 @@ pub enum FlashloanError {
     #[error("Missing owner account. Use the `FlashloanBuilder::with_owner` method to set the owner account")]
     MissingOwner,
 }
-
