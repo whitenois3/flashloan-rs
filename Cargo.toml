@@ -1,6 +1,6 @@
 [package]
 name = "flashloan-rs"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["asnared <https://github.com/abigger87>"]
 description = "Minimal Multicall3 Flashloan Module"
