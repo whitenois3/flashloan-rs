@@ -89,14 +89,14 @@ builder.with_owner(wallet_address).with_lender(lender).with_token(token_to_flash
 
 ### Blueprint
 
-```ml
-.
+```
+flashloan-rs
 ├─ contracts
 │  ├─ interfaces
 │  │  ├─ IERC20.sol — ERC20 interface
 │  │  ├─ IERC3156FlashBorrower.sol — Flashloan borrower interface
 |  |  └─ IERC3156FlashLender.sol — Flashloan lender interface
-│  ├─ FlashBorrower.huff — A [huff](https://github.com/huff-language) Flashloan Receiver Contract Implementation
+│  ├─ FlashBorrower.huff — A https://github.com/huff-language Flashloan Receiver Contract Implementation
 │  └─ FlashBorrower.sol — An Extensible Flashloan Receiver Contract
 ├─ examples
 │  ├─ custom_borrower.rs — Flashloan-rs usage with a custom borrower contract
