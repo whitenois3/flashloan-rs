@@ -1,0 +1,2 @@
+FlashBorrowerTest:testFlashLoan(address) (runs: 256, μ: 58978, ~: 58978)
+FlashBorrowerTest:testMetadata() (gas: 10752)

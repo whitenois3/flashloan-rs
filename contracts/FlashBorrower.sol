@@ -10,10 +10,10 @@ import "contracts/interfaces/IERC3156FlashLender.sol";
 /// @notice A Minimal, Multicallable Flashloan Receiver
 contract FlashBorrower is IERC3156FlashBorrower {
     /// @notice The flashloan lender
-    IERC3156FlashLender lender;
+    IERC3156FlashLender public lender;
 
     /// @notice The contract owner
-    address immutable OWNER;
+    address public immutable owner;
 
     /// @notice The amount we need to pay back to the lender
     uint256 payback;
@@ -27,6 +27,9 @@ contract FlashBorrower is IERC3156FlashBorrower {
     /// @notice Errors if the flashloan initiator is not this contract
     error UntrustedInitiator();
 
+    /// @notice Thrown if the contract has no eth balance
+    error EmptyBalance();
+
     /// @notice Only this contract can call
     modifier onlySelf() {
         if (msg.sender != address(this)) revert Unauthorized();
@@ -35,7 +38,7 @@ contract FlashBorrower is IERC3156FlashBorrower {
 
     /// @notice Only the receiver owner can call
     modifier onlyOwner() {
-        if (msg.sender != OWNER) revert Unauthorized();
+        if (msg.sender != owner) revert Unauthorized();
         _;
     }
 
@@ -46,7 +49,7 @@ contract FlashBorrower is IERC3156FlashBorrower {
     /// @notice Receiver Construction
     constructor(IERC3156FlashLender lender_, address owner_) {
         lender = lender_;
-        OWNER = owner_;
+        owner = owner_;
     }
 
     /// @notice Executes the flashloan and middle calls
@@ -63,6 +66,22 @@ contract FlashBorrower is IERC3156FlashBorrower {
         bytes memory data = abi.encode(calls);
         lender.flashLoan(this, token, amount, data);
     }
+
+    /// @notice owner can withdraw ERC20 tokens
+    function withdrawToken(IERC20 token, address to, uint256 amount, bool max) external onlyOwner returns (bool) {
+        if (max) amount = token.balanceOf(address(this));
+        token.transfer(to, amount);
+        return true;
+    }
+
+    /// @notice Owner can withdraw ETH
+    function withdrawEth(address payable to) external onlyOwner returns (bool) {
+        if (address(this).balance == 0) revert EmptyBalance();
+        to.transfer(address(this).balance);
+        return true;
+    }
+
+    receive() external payable {}
 
     ///  /‾‾\__/‾‾\__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\__/‾‾\__/‾‾\
     ///                    ERC-3156 LOGIC
