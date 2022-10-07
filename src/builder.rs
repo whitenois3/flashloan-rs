@@ -1,9 +1,10 @@
-use ethers::{prelude::{*, builders::ContractCall}, types::transaction, abi::{Function, Param}};
+use ethers::prelude::*;
 use std::{str::FromStr, sync::Arc};
-use ethers::contract::Contract;
+use anyhow::Result;
 
-use crate::{calls::Call3, errors::FlashloanError};
+use crate::errors::FlashloanError;
 
+#[allow(missing_docs)]
 abigen!(Flashloan, "src/FlashBorrower.json");
 
 /// FlashloanBuilder
@@ -16,8 +17,13 @@ abigen!(Flashloan, "src/FlashBorrower.json");
 ///     use flashloan_rs::prelude::*;
 ///     use ethers::prelude::*;
 ///
+///     // Create a default provider
+///     let client = Provider::<Http>::try_from("http://localhost:8545").unwrap();
+///
 ///     // Create a flashloan builder
-///     let mut builder = FlashloanBuilder::new();
+///     let mut builder = FlashloanBuilder::new(
+///         Arc::clone(&client),
+///     );
 ///
 ///     // Add a call to the builder
 ///     builder.add_call(
@@ -31,7 +37,7 @@ abigen!(Flashloan, "src/FlashBorrower.json");
 /// ```
 pub struct FlashloanBuilder<M> {
     /// The flashloan borrower contract
-    pub borrower: Contract<M>,
+    pub borrower: Option<Flashloan<M>>,
     /// The borrower owner (should be the client signer)
     /// If none, the first client account will be used
     pub owner: Option<Address>,
@@ -45,6 +51,8 @@ pub struct FlashloanBuilder<M> {
     pub amount: Option<U256>,
     /// Associated calls
     pub calls: Vec<Call3>,
+    /// The chain id
+    pub chain_id: u64
 }
 
 impl<M: Middleware> FlashloanBuilder<M> {
@@ -53,79 +61,74 @@ impl<M: Middleware> FlashloanBuilder<M> {
     ///
     /// ### Usage
     ///
-    /// A [FlashloanBuilder](flashloan_rs::FlashloanBuilder) is constructed using a provided
-    /// [Middleware](ethers::Middleware) and u64 chain id.
+    /// A [FlashloanBuilder](flashloan_rs::FlashloanBuilder) is constructed with a given borrower contract if provided.
     ///
-    /// Additionally, a [Multicall](ethers::multicall::Multicall) instance is constructed using the
-    /// provided [Middleware](ethers::Middleware) and the [Multicall3](https://github.com/mds1/multicall) contract address (`0xcA11bde05977b3631167028862bE2a173976CA11`).
+    /// ### Arguments
     ///
-    /// ### Panics
+    /// - `client`: A [Middleware](ethers::Middleware) client
+    /// - `chain_id`: A u64 chain id
+    /// - `owner`: An optional [Address](ethers::types::Address) for who owns the borrower contract
+    /// - `lender`: An optional [Address](ethers::types::Address) for the flash lender
+    /// - `token`: An optional [Address](ethers::types::Address) for the token to borrow
+    /// - `amount`: An optional [U256](ethers::types::U256) for the amount to borrow
+    /// - `override_contract`: Optionally override the flashloan borrower contract to use
     ///
-    /// Panics if the provided chain id is not valid.
-    ///
-    /// Technically, panics if Multicall3 contract address is not valid or the Multicall instance
-    /// fails to construct. Neither will happen since the contract address is checked and
-    /// Multicall3 is backwards-compatible with the Multicall2 and Multicall interfaces.
-    pub async fn new(
+    pub fn new(
         client: Arc<M>,
         chain_id: u64,
+        owner: Option<Address>,
+        lender: Option<Address>,
+        token: Option<Address>,
+        amount: Option<U256>,
         override_contract: Option<Address>,
     ) -> Self {
-        let mut fl = Self {
+        Self {
+            // The borrower contract should be deployed later if not specified
+            borrower: override_contract.map(|contract| {
+                Flashloan::new(
+                    contract,
+                    client.clone(),
+                )
+            }),
+            owner,
+            lender,
             client: Arc::clone(&client),
-            multicall: Multicall::new_with_chain_id(
-                Arc::clone(&client),
-                Some(Address::from_str("0xcA11bde05977b3631167028862bE2a173976CA11").unwrap()),
-                Some(U256::from(chain_id).unwrap()),
-            )
-            .await
-            .expect("Failed to initialize Multicall3"),
-        };
+            token,
+            amount,
+            calls: vec![],
+            chain_id
+        }
+    }
 
-        // Add the flashloan call
-        let sender = client.get_accounts().await.unwrap().get(0).map(|a| *a);
+    /// Set the owner of the deployed borrower contract
+    ///
+    /// ### Usage
+    ///
+    /// This should be set **before** the borrower contract is deployed
+    /// by the associated [deploy](FlashBuilder::deploy) method.
+    ///
+    /// Returns a mutable reference to the builder for method chaining.
+    pub fn with_owner(&mut self, owner: Address) -> &mut Self {
+        self.owner = Some(owner);
+        self
+    }
 
-        fl.multicall.add_call(
-            ContractCall {
-                tx: transaction::eip2718::TypedTransaction::Eip1559(
-                    Eip1559TransactionRequest {
-                        from: sender,
-                        to: (),
-                        gas: (),
-                        value: (),
-                        data: (),
-                        nonce: (),
-                        access_list: (),
-                        max_priority_fee_per_gas: (),
-                        max_fee_per_gas: (),
-                        chain_id: ()
-                    }
-                ),
-                function: Function {
-                    name: "flashBorrow".to_string(),
-                    inputs: vec![
-                        Param {
-                            name: todo!(),
-                            kind: todo!(),
-                            internal_type: todo!()
-                        },
-                    ],
-                    outputs: todo!(),
-                    constant: todo!(),
-                    state_mutability: todo!()
-                },
-                block: None,
-                client: Arc::clone(&client),
-                datatype: std::marker::PhantomData,
-            },
-        );
-
-        fl
+    /// Set the lender of the deployed borrower contract
+    ///
+    /// ### Usage
+    ///
+    /// This should be set **before** the borrower contract is deployed
+    /// by the associated [deploy](FlashBuilder::deploy) method.
+    ///
+    /// Returns a mutable reference to the builder for method chaining.
+    pub fn with_lender(&mut self, lender: Address) -> &mut Self {
+        self.lender = Some(lender);
+        self
     }
 
     /// Deploy a new flashloan borrower contract
-    pub fn with_deploy(&self, lender: Option<Address>) -> &self {
-        // Get the flash lender
+    pub async fn deploy(&mut self, lender: Option<Address>, owner: Option<Address>) -> Result<&mut Self> {
+        // Unpack the flash lender
         let deploy_lender = lender.unwrap_or_else(|| {
             self.lender.unwrap_or_else(|| {
                 // If none configured, use the MakerDAO Flash Lender
@@ -135,8 +138,22 @@ impl<M: Middleware> FlashloanBuilder<M> {
             })
         });
 
-        Flashloan::deploy(self.client, vec![deploy_lender, ])
-        self
+        // Unpack the owner
+        let mut optional_owner = owner;
+        if optional_owner.is_none() {
+            optional_owner = self.owner;
+        }
+        if optional_owner.is_none() {
+            // If none configured, use the first account
+            let accounts = self.client.get_accounts().await.map_err(|e| FlashloanError::ClientFailure(e.to_string()))?;
+            let first_account = *accounts.get(0).ok_or(FlashloanError::MissingOwner)?;
+            optional_owner = Some(first_account);
+        }
+        let deploy_owner = optional_owner.unwrap();
+
+        let contract_deployer = Flashloan::deploy(Arc::clone(&self.client), vec![deploy_lender, deploy_owner]).map_err(|_| FlashloanError::ContractDeployError)?;
+        self.borrower = Some(contract_deployer.send().await.map_err(|_| FlashloanError::ContractDeployError)?);
+        Ok(self)
     }
 
     /// Access the inner client
@@ -144,35 +161,88 @@ impl<M: Middleware> FlashloanBuilder<M> {
         Arc::clone(&self.client)
     }
 
-    /// Adds a Call3 to the builder
-    pub fn add_call(&mut self, call: Call3) {
+    /// Appends a Call3 to the builder
+    /// Returns a reference to the builder for method chaining
+    pub fn add_call(&mut self, call: Call3) -> &mut Self {
         self.calls.push(call);
+        self
     }
 
-    /// Call
-    pub async fn call(&mut self) -> Result<(), FlashloanError> {
+    /// Specify the token address to borrow
+    /// Returns a reference to the builder for method chaining
+    pub fn with_token(&mut self, token: Address) -> &mut Self {
+        self.token = Some(token);
+        self
+    }
+
+    /// Specify the amount to borrow
+    /// Returns a reference to the builder for method chaining
+    pub fn with_amount(&mut self, amount: U256) -> &mut Self {
+        self.amount = Some(amount);
+        self
+    }
+
+    /// [**Async**] Call the flashloan function on the borrower contract
+    ///
+    /// Returns an empty result if successful since the flashloan function should have no return value.
+    ///
+    /// ### Errors
+    ///
+    /// Returns a [MissingToken](FlashloanError::MissingToken) if the token address (to borrow) is not specified.
+    /// Returns a [MissingAmount](FlashloanError::MissingAmount) if the amount to borrow is not specified.
+    /// Returns a [MissingBorrower](FlashloanError::MissingBorrower) if the borrower contract is not specified.
+    /// Returns a [ContractError](FlashloanError::ContractError) if the call errors with a string error message.
+    pub async fn call(&mut self) -> Result<()> {
         // Deconstruct the flash borrow parameters
         let token = self.token.ok_or(FlashloanError::MissingToken)?;
         let amount = self.amount.ok_or(FlashloanError::MissingAmount)?;
-        let mapped_calls = self.calls.iter().map(|c|  builder::flashloan::Call3 {}).collect();
-        Flashloan::flash_borrow(&self, token, amount, self.calls).call().await.map_err(|ce| FlashloanError::ContractError(ce))?;
-        Ok(())
+        self.inner_call(token, amount, &*self.calls.clone()).await
     }
 
     /// The internal call executor
     ///
     /// ### Arguments
     ///
-    /// Arguments are optional and should be 
-    pub fn inner_call(&mut self, token: Option<Address>, amount: Option<U256>, calls: Option<Vec<Call3>>) -> Result<Vec<Bytes>, FlashloanError> {
-        
-        // Execute the flashloan call
-        Flashloan::flash_borrow(&self, token, amount, calls)
-        Err(FlashloanError::CallFailed)
+    /// Arguments should be specified with the associated builder pattern methods:
+    /// - [with_token](FlashloanBuilder::with_token)
+    /// - [with_amount](FlashloanBuilder::with_amount)
+    /// - [add_call](FlashloanBuilder::add_call)
+    pub async fn inner_call(&mut self, token: Address, amount: U256, calls: &[Call3]) -> Result<()> {
+        let contract = self.borrower.as_ref().ok_or(FlashloanError::MissingBorrower)?;
+        contract.flash_borrow(token, amount, calls.to_vec()).call().await.map_err(|ce| FlashloanError::ContractError(ce.to_string()))?;
+        Ok(())
     }
 
-    /// Execute the flashloan with the wrapped calls
-    pub async fn execute(&self) -> Result<Vec<Bytes>, anyhow::Error> {
-        self.multicall.send().await
+    /// [**Async**] Execute the flashloan function on the borrower contract
+    ///
+    /// Returns the result of the flashloan function if successful.
+    ///
+    /// ### Errors
+    ///
+    /// Returns a [MissingToken](FlashloanError::MissingToken) if the token address (to borrow) is not specified.
+    /// Returns a [MissingAmount](FlashloanError::MissingAmount) if the amount to borrow is not specified.
+    /// Returns a [MissingBorrower](FlashloanError::MissingBorrower) if the borrower contract is not specified.
+    /// Returns a [ContractError](FlashloanError::ContractError) if the call errors with a string error message.
+    pub async fn execute(&mut self) -> Result<Option<TransactionReceipt>> {
+        // Deconstruct the flash borrow parameters
+        let token = self.token.ok_or(FlashloanError::MissingToken)?;
+        let amount = self.amount.ok_or(FlashloanError::MissingAmount)?;
+        self.inner_execute(token, amount, &*self.calls.clone()).await
+    }
+
+    /// The internal executor
+    ///
+    /// ### Arguments
+    ///
+    /// Arguments should be specified with the associated builder pattern methods:
+    /// - [with_token](FlashloanBuilder::with_token)
+    /// - [with_amount](FlashloanBuilder::with_amount)
+    /// - [add_call](FlashloanBuilder::add_call)
+    pub async fn inner_execute(&mut self, token: Address, amount: U256, calls: &[Call3]) -> Result<Option<TransactionReceipt>> {
+        let contract = self.borrower.as_ref().ok_or(FlashloanError::MissingBorrower)?;
+        let contract_call = contract.flash_borrow(token, amount, calls.to_vec());
+        let pending_transaction = contract_call.send().await.map_err(|ce| FlashloanError::ContractError(ce.to_string()))?;
+        let optional_receipt = pending_transaction.await.map_err(|ce| FlashloanError::ContractError(ce.to_string()))?;
+        Ok(optional_receipt)
     }
 }
