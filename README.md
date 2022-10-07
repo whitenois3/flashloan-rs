@@ -2,7 +2,7 @@
 
 # flashloan-rs • [![ci](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/whitenois3/flashloan-rs/actions/workflows/tests.yaml) ![license](https://img.shields.io/github/license/whitenois3/flashloan-rs) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey) ![Crates.io](https://img.shields.io/crates/v/flashloan-rs)
 
-Minimal Multicall3 Flashloan Module.
+Minimal flashloan borrower contracts with an extensible rust sdk.
 
 
 ### Getting Started
