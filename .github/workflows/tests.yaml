@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   tests:
-    name: Tests (Stable)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
