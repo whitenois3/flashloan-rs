@@ -97,13 +97,13 @@ async fn test_deploy_flashloan_borrower() {
     println!("Successfully deployed FlashloanBorrower ✅");
     println!();
 
-    // // Validate the lender and owner are set properly on the deployed flashloan borrower contract
-    // let deployed_owner = builder.borrower.unwrap().owner().call().await.unwrap();
-    // println!("Deployed flashloan borrower owner: {:?}", deployed_owner);
-    // assert_eq!(deployed_owner, wallet_address);
-    // let deployed_lender = builder.borrower.unwrap().lender().call().await.unwrap();
-    // println!("Deployed flashloan borrower lender: {:?}", deployed_lender);
-    // assert_eq!(deployed_lender, mainnet_dss_flash);
+    // Validate the lender and owner are set properly on the deployed flashloan borrower contract
+    let deployed_owner = builder.borrower.as_ref().unwrap().owner().call().await.unwrap();
+    println!("Deployed flashloan borrower owner: {:?}", deployed_owner);
+    assert_eq!(deployed_owner, wallet_address);
+    let deployed_lender = builder.borrower.as_ref().unwrap().lender().call().await.unwrap();
+    println!("Deployed flashloan borrower lender: {:?}", deployed_lender);
+    assert_eq!(deployed_lender, mainnet_dss_flash);
 
     // Call the flashloan function to check if successfull
     println!("Validating flashloan function with static call...");
