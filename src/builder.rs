@@ -2,10 +2,8 @@ use ethers::prelude::*;
 use std::{str::FromStr, sync::Arc};
 use anyhow::Result;
 
-use crate::errors::FlashloanError;
-
-#[allow(missing_docs)]
-abigen!(Flashloan, "src/FlashBorrower.json");
+use crate::errors::*;
+use crate::contract::*;
 
 /// FlashloanBuilder
 ///
@@ -18,7 +16,7 @@ abigen!(Flashloan, "src/FlashBorrower.json");
 ///     use ethers::prelude::*;
 ///
 ///     // Create a default provider
-///     let client = Provider::<Http>::try_from("http://localhost:8545").unwrap();
+///     let client = Provider::<Http>::try_from("https://mainnet.infura.io/v3/c60b0bb42f8a4c6481ecd229eddaca27").unwrap();
 ///
 ///     // Create a flashloan builder
 ///     let mut builder = FlashloanBuilder::new(

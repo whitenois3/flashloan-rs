@@ -6,3 +6,7 @@ libs = ["lib"]
 solc_version = '0.8.15'
 auto_detect_solc = false
 optimizer_runs = 1_000
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "solmate/=lib/solmate/src/"
+]

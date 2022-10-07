@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.15;
+pragma solidity ^0.8.17;
 
 import "contracts/interfaces/IERC20.sol";
 import "contracts/interfaces/IERC3156FlashBorrower.sol";

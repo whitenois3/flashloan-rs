@@ -10,10 +10,14 @@ pub mod errors;
 /// Main Flashloan Builder Module
 pub mod builder;
 
+/// The flashloan contract
+pub mod contract;
+
 /// Re-export a prelude
 pub mod prelude {
     pub use super::{
         builder::*,
-        errors::*
+        errors::*,
+        contract::*
     };
 }
