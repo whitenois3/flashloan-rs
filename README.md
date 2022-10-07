@@ -15,7 +15,7 @@ Or, add the following to your Cargo.toml:
 
 ```toml
 [dependencies]
-flashloan-rs = "0.2.2"
+flashloan-rs = "0.2.3"
 ```
 
 
@@ -89,7 +89,7 @@ builder.with_owner(wallet_address).with_lender(lender).with_token(token_to_flash
 
 ### Blueprint
 
-```
+```txt
 flashloan-rs
 ├─ contracts
 │  ├─ interfaces
