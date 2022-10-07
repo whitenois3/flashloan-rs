@@ -20,6 +20,11 @@ jobs:
         with:
           cache-on-failure: true
 
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - name: cargo test
         run: cargo test --all --all-features
 
@@ -71,7 +76,6 @@ jobs:
         run: cargo +nightly build --all
 
   contract-tests:
-    name: Contract Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
