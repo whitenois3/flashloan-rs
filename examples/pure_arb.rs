@@ -1,8 +1,8 @@
-use eyre::Result;
 use ethers::{
     prelude::*,
     utils::{format_ether, Anvil},
 };
+use eyre::Result;
 use std::{str::FromStr, sync::Arc};
 
 // Import the flashloan-rs crate
@@ -71,14 +71,12 @@ async fn main() -> Result<()> {
     // TODO: Swap DAI for ETH via Uniswap
     // TODO: Swap ETH back for DAI via balancer
     // TODO: ensure profit > fee + gas
-    builder.add_call(
-        Call3 {
-            target: mainnet_dai,
-            call_data: Bytes::from(hex::decode("0x095ea7b3").unwrap()),
-            value: 0.into(),
-            allow_failure: false
-        }
-    );
+    builder.add_call(Call3 {
+        target: mainnet_dai,
+        call_data: Bytes::from(hex::decode("0x095ea7b3").unwrap()),
+        value: 0.into(),
+        allow_failure: false,
+    });
 
     // TODO: Estimate profitability + gas with a call
 

@@ -25,7 +25,7 @@ flashloan-rs = "0.1.0"
 
 **Quick Construction**
 
-```rust
+```rust,ignore
 use std::{str::FromStr, sync::Arc};
 use flashloan_rs::prelude::*;
 use ethers::prelude::*;
@@ -62,7 +62,7 @@ let tx_receipt = optional_tx_receipt.unwrap();
 
 **Builder Pattern**
 
-```rust
+```rust,ignore
 use std::{str::FromStr, sync::Arc};
 use flashloan_rs::prelude::*;
 use ethers::prelude::*;
